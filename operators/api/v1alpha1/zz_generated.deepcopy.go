@@ -19,6 +19,7 @@
 package v1alpha1
 
 import (
+	"github.com/netgroup-polito/CrownLabs/operators/api/v1alpha2"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -264,7 +265,7 @@ func (in *TenantStatus) DeepCopyInto(out *TenantStatus) {
 	}
 	if in.Subscriptions != nil {
 		in, out := &in.Subscriptions, &out.Subscriptions
-		*out = make(map[string]SubscriptionStatus, len(*in))
+		*out = make(map[string]v1alpha2.SubscriptionStatus, len(*in))
 		for key, val := range *in {
 			(*out)[key] = val
 		}
@@ -377,7 +378,7 @@ func (in *WorkspaceStatus) DeepCopyInto(out *WorkspaceStatus) {
 	out.Namespace = in.Namespace
 	if in.Subscriptions != nil {
 		in, out := &in.Subscriptions, &out.Subscriptions
-		*out = make(map[string]SubscriptionStatus, len(*in))
+		*out = make(map[string]v1alpha2.SubscriptionStatus, len(*in))
 		for key, val := range *in {
 			(*out)[key] = val
 		}

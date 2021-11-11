@@ -15,6 +15,7 @@
 package v1alpha1
 
 import (
+	"github.com/netgroup-polito/CrownLabs/operators/api/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -33,12 +34,12 @@ type WorkspaceStatus struct {
 	// This is the namespace that groups multiple related templates, together
 	// with all the accessory resources (e.g. RBACs) created by the tenant
 	// operator.
-	Namespace NameCreated `json:"namespace,omitempty"`
+	Namespace v1alpha2.NameCreated `json:"namespace,omitempty"`
 
 	// The list of the subscriptions to external services (e.g. Keycloak,
 	// Nextcloud, ...), indicating for each one whether it succeeded or an error
 	// occurred.
-	Subscriptions map[string]SubscriptionStatus `json:"subscription,omitempty"`
+	Subscriptions map[string]v1alpha2.SubscriptionStatus `json:"subscription,omitempty"`
 
 	// Whether all subscriptions and resource creations succeeded or an error
 	// occurred. In case of errors, the other status fields provide additional

@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1alpha1
+package v1alpha2
 
 import (
-	"github.com/netgroup-polito/CrownLabs/operators/api/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -44,14 +43,11 @@ const (
 // TenantWorkspaceEntry contains the information regarding one of the Workspaces
 // the Tenant is subscribed to, including his/her role.
 type TenantWorkspaceEntry struct {
-	// The reference to the Workspace resource the Tenant is subscribed to.
-	WorkspaceRef v1alpha2.GenericRef `json:"workspaceRef"`
+	// The Workspace the Tenant is subscribed to.
+	Name string `json:"name"`
 
 	// The role of the Tenant in the context of the Workspace.
 	Role WorkspaceUserRole `json:"role"`
-
-	// The number of the group the Tenant belongs to. Empty means no group.
-	GroupNumber uint `json:"groupNumber,omitempty"`
 }
 
 // TenantSpec is the specification of the desired state of the Tenant.
@@ -70,6 +66,8 @@ type TenantSpec struct {
 
 	// The list of the Workspaces the Tenant is subscribed to, along with his/her
 	// role in each of them.
+	// +listType=map
+	// +listMapKey=name
 	Workspaces []TenantWorkspaceEntry `json:"workspaces,omitempty"`
 
 	// The list of the SSH public keys associated with the Tenant. These will be
@@ -89,11 +87,11 @@ type TenantStatus struct {
 	// This is the namespace that groups his/her own Instances, together with
 	// all the accessory resources (e.g. RBACs, resource quotas, network policies,
 	// ...) created by the tenant-operator.
-	PersonalNamespace v1alpha2.NameCreated `json:"personalNamespace"`
+	PersonalNamespace NameCreated `json:"personalNamespace"`
 
 	// The namespace that can be freely used by the Tenant to play with Kubernetes.
 	// This namespace is created only if the .spec.CreateSandbox flag is true.
-	SandboxNamespace v1alpha2.NameCreated `json:"sandboxNamespace"`
+	SandboxNamespace NameCreated `json:"sandboxNamespace"`
 
 	// The list of Workspaces that are throwing errors during subscription.
 	// This mainly happens if .spec.Workspaces contains references to Workspaces
@@ -103,7 +101,7 @@ type TenantStatus struct {
 	// The list of the subscriptions to external services (e.g. Keycloak,
 	// Nextcloud, ...), indicating for each one whether it succeeded or an error
 	// occurred.
-	Subscriptions map[string]v1alpha2.SubscriptionStatus `json:"subscriptions"`
+	Subscriptions map[string]SubscriptionStatus `json:"subscriptions"`
 
 	// Whether all subscriptions and resource creations succeeded or an error
 	// occurred. In case of errors, the other status fields provide additional
@@ -113,6 +111,7 @@ type TenantStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:storageversion
 // +kubebuilder:resource:scope="Cluster"
 // +kubebuilder:printcolumn:name="First Name",type=string,JSONPath=`.spec.firstName`
 // +kubebuilder:printcolumn:name="Last Name",type=string,JSONPath=`.spec.lastName`
@@ -142,6 +141,9 @@ type TenantList struct {
 func init() {
 	SchemeBuilder.Register(&Tenant{}, &TenantList{})
 }
+
+// Hub is to enable conversion webhook.
+func (*Tenant) Hub() {}
 
 // SetupWebhookWithManager setups the webhook with the given manager.
 func (r *Tenant) SetupWebhookWithManager(mgr ctrl.Manager) error {
